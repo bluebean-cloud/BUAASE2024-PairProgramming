@@ -1,5 +1,89 @@
 // The entry file of your WebAssembly module.
 
-export function add(a: i32, b: i32): i32 {
-  return a + b;
+// export function add(a: i32, b: i32): i32 {
+//   return a + b;
+// }
+
+
+function update(holes: i32[], player: i32, index: i32): i32 {
+  if (player == 2) {
+    index += 7;
+  }
+  let balls = holes[index];
+  holes[index] = 0;
+  while (balls > 0) {
+    index++;
+    index %= 14;
+    if (index == 6 && player == 2 || index == 13 && player == 1) {
+    } else {
+      holes[index]++;
+      balls--;
+    }
+  }
+  if (index == 6 && player == 1 || index == 13 && player == 2) {
+    return player;
+  }
+  if (holes[index] == 1 && Math.floor(index / 7) + 1 == player) { // 得分啦
+    let scoreHole = player * 7 - 1;
+    holes[index] = 0;
+    holes[scoreHole] += 1 + holes[12 - index];
+    holes[12 - index] = 0;
+  }
+  return 3 - player;
 }
+
+function check(holes: i32[], op: i32, nextPlay: i32, i: i32): i32 {
+  if (op % 10 > 6 || op % 10 < 1) {
+    return 30000 + i;
+  }
+  if (nextPlay != Math.floor(op / 10)) {  // 下一手不该是你！
+    return 30000 + i;
+  }
+  let index: i32 = nextPlay == 1 ? op % 10 - 1 : op % 10 + 6;
+  if (holes[index] == 0) {
+    return 30000 + i;
+  }
+  return 0;
+}
+
+function checkEnd(holes: i32[]): i32 {
+  let check = 0;
+  for (let i = 0; i < 6; i++) {
+    check += holes[i];
+  }
+  if (check == 0) {
+    return 1;
+  }
+  for (let i = 7; i < 13; i++) {
+    check += holes[i];
+  }
+  if (check == 0) {
+    return 2;
+  }
+  return 0;
+}
+
+export function mancalaResult(firstHand: i32, op: i32[], size: i32): i32 {
+  let holes: i32[] = new Array<i32>(14).fill(4);  // holes[6] [13] 作为得分洞，0-5 属于 player1，7-12 属于player2
+  let nextPlay:i32 = firstHand;
+  for (let i:i32 = 0; i < size; i++) {
+    let check_result = check(holes, op[i], nextPlay, i);
+    if (check_result != 0) { // error
+      return check_result;
+    }
+
+    nextPlay = update(holes, nextPlay, op[i] % 10 - 1);
+  }
+  let checkEnd_result = checkEnd(holes);
+  if (checkEnd_result == 0) {
+    return 20000 + holes[firstHand * 7 - 1];
+  }
+  let ans: i32 = 0; // 1 的净胜棋数
+  if (checkEnd_result == 1) {
+    ans = 2 * holes[6] - 48;
+  } else {
+    ans = 48 - 2 * holes[13];
+  }
+  return 15000 +  (firstHand == 1 ? ans : -ans);
+}
+// 完成于2024/3/30 22:50
