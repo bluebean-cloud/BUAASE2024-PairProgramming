@@ -1,4 +1,4 @@
-import assert from "assert";
-import { add } from "../build/debug.js";
-assert.strictEqual(add(1, 2), 3);
-console.log("ok");
+import { mancalaBoard } from "../build/release.js"
+
+
+console.log(mancalaBoard(1, [16, 22], 2).toString());

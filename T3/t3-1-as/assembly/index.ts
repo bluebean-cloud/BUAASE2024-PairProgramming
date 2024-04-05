@@ -1,7 +1,7 @@
 
 function update(holes: i32[], player: i32, index: i32): i32 {
-  console.log("player: " + player.toString() + " index: " + index.toString());
-  console.log("cur holes: " + holes.toString());
+  // console.log("player: " + player.toString() + " index: " + index.toString());
+  // console.log("cur holes: " + holes.toString());
   if (player == 2) {
     index += 7;
   }
@@ -66,16 +66,16 @@ function mancalaResult(firstHand: i32, op: i32[], size: i32): i32 {
   holes[13] = 0;
   let nextPlay:i32 = firstHand;
   for (let i:i32 = 0; i < size; i++) {
-    console.log(i.toString())
+    // console.log(i.toString())
     let check_result = check(holes, op[i], nextPlay, i);
     if (check_result != 0) { // error
       return check_result;
     }
     nextPlay = update(holes, nextPlay, op[i] % 10 - 1);
-    console.log("after update: " + holes.toString());
+    // console.log("after update: " + holes.toString());
   }
   let checkEnd_result = checkEnd(holes);
-  console.log("final holes: " + holes.toString());
+  // console.log("final holes: " + holes.toString());
   if (checkEnd_result == 0) {
     return 20000 + holes[firstHand * 7 - 1];
   }
@@ -90,11 +90,13 @@ function mancalaResult(firstHand: i32, op: i32[], size: i32): i32 {
 
 export function mancalaBoard(firstHand: i32, op: i32[], size: i32): Array<i32> {
   let holes: i32[] = new Array<i32>(15).fill(4);  // holes[6] [13] 作为得分洞，0-5 属于 player1，7-12 属于player2
+  console.log("ops: " + op.toString());
   holes[6] = 0;
   holes[13] = 0;
+  holes[14] = 0;
   let nextPlay:i32 = firstHand;
   for (let i:i32 = 0; i < size; i++) {
-    console.log(i.toString())
+    // console.log(i.toString())
     let check_result = check(holes, op[i], nextPlay, i);
     if (check_result != 0) { // error
       let errHand: i32 = Math.floor(op[i] / 10) as i32;
@@ -103,12 +105,15 @@ export function mancalaBoard(firstHand: i32, op: i32[], size: i32): Array<i32> {
       } else {
         holes[14] = 100 + 48 - 2 * holes[13];
       }
+      console.log("error!");
       return holes;
     }
     nextPlay = update(holes, nextPlay, op[i] % 10 - 1);
-    console.log("after update: " + holes.toString());
+    // console.log("after update: " + holes.toString());
   }
   let checkEnd_result = checkEnd(holes);
+  console.log("op: " + op[size - 1].toString() + " board: " + holes.toString());
+
   if (checkEnd_result == 0) { // 未结束
     holes[14] = nextPlay;
     return holes;
