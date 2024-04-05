@@ -6,6 +6,8 @@
 
 
 function update(holes: i32[], player: i32, index: i32): i32 {
+  console.log("player: " + player.toString() + " index: " + index.toString());
+  console.log("cur holes: " + holes.toString());
   if (player == 2) {
     index += 7;
   }
@@ -23,7 +25,7 @@ function update(holes: i32[], player: i32, index: i32): i32 {
   if (index == 6 && player == 1 || index == 13 && player == 2) {
     return player;
   }
-  if (holes[index] == 1 && Math.floor(index / 7) + 1 == player) { // 得分啦
+  if (holes[index] == 1 && Math.floor(index / 7) + 1 == player && holes[12 - index] != 0) { // 得分啦
     let scoreHole = player * 7 - 1;
     holes[index] = 0;
     holes[scoreHole] += 1 + holes[12 - index];
@@ -52,29 +54,34 @@ function checkEnd(holes: i32[]): i32 {
     check += holes[i];
   }
   if (check == 0) {
-    return 1;
+    return 1; // 1 棋洞空，结束
   }
+  check = 0;
   for (let i = 7; i < 13; i++) {
     check += holes[i];
   }
   if (check == 0) {
-    return 2;
+    return 2; // 2 棋洞为空
   }
-  return 0;
+  return 0; // 未结束
 }
 
 export function mancalaResult(firstHand: i32, op: i32[], size: i32): i32 {
   let holes: i32[] = new Array<i32>(14).fill(4);  // holes[6] [13] 作为得分洞，0-5 属于 player1，7-12 属于player2
+  holes[6] = 0;
+  holes[13] = 0;
   let nextPlay:i32 = firstHand;
   for (let i:i32 = 0; i < size; i++) {
+    console.log(i.toString())
     let check_result = check(holes, op[i], nextPlay, i);
     if (check_result != 0) { // error
       return check_result;
     }
-
     nextPlay = update(holes, nextPlay, op[i] % 10 - 1);
+    console.log("after update: " + holes.toString());
   }
   let checkEnd_result = checkEnd(holes);
+  console.log("final holes: " + holes.toString());
   if (checkEnd_result == 0) {
     return 20000 + holes[firstHand * 7 - 1];
   }
