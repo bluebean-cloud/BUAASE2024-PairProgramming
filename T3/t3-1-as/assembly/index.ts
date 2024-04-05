@@ -88,13 +88,13 @@ function mancalaResult(firstHand: i32, op: i32[], size: i32): i32 {
   return 15000 +  (firstHand == 1 ? ans : -ans);
 }
 
-export function mancalaBoard(firstHand: i32, op: i32[], size: i32): Array<i32> {
+export function mancalaBoard(lastHand: i32, op: i32[], size: i32): Array<i32> {
   let holes: i32[] = new Array<i32>(15).fill(4);  // holes[6] [13] 作为得分洞，0-5 属于 player1，7-12 属于player2
   console.log("ops: " + op.toString());
   holes[6] = 0;
   holes[13] = 0;
   holes[14] = 0;
-  let nextPlay:i32 = firstHand;
+  let nextPlay:i32 = op[0] / 10;
   for (let i:i32 = 0; i < size; i++) {
     // console.log(i.toString())
     let check_result = check(holes, op[i], nextPlay, i);
@@ -105,6 +105,7 @@ export function mancalaBoard(firstHand: i32, op: i32[], size: i32): Array<i32> {
       } else {
         holes[14] = 100 + 48 - 2 * holes[13];
       }
+      console.log("curBord: " + holes.toString());
       console.log("error!");
       return holes;
     }
