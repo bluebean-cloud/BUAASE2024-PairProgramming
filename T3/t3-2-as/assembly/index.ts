@@ -130,37 +130,40 @@ function evaluate(holes: i32[]): i32 {
 function miniMax(holes: i32[],  deep: i32): i32 {
   let max: i32 = -9999;
   let step: i32 = -1;
-  for (let i:i32 = 0; i < 6; i++) {
+  for (let i:i32 = 5; i >= 0; i--) {
     if (holes[i] != 0) {
       let copy: i32[] = holes.slice();
       let nextPlay = update(copy, 1, i);
       if (nextPlay == 1) {
-        let t = maxValue(copy, i, deep - 1);
+        let t = maxValue(copy, i, deep, 9999);
         if (max < t) {
           step = i;
           max = t;
         }
         // console.log("step: " + i.toString() + " t: " + t.toString());
-    } else {
-        let t = minValue(copy, i, deep - 1);
+      } else {
+        let t = minValue(copy, i, deep - 1, max);
         if (max < t) {
           step = i;
           max = t;
         }
         // console.log("step: " + i.toString() + " t: " + t.toString());
-    }
+      }
     }
   }
   return step;
 }
 
 // 我们始终以 1 玩家思考
-function maxValue(holes: i32[], step: i32, deep: i32): i32 {
+function maxValue(holes: i32[], step: i32, deep: i32, curMin: i32): i32 {
   if (deep <= 0) {
     return evaluate(holes);
   }
   let max: i32 = -9999;
-  for (let i:i32 = 0; i < 6; i++) {
+  for (let i:i32 = 5; i >= 0; i--) {
+    if (max >= curMin) {
+      return max;
+    }
     if (holes[i] != 0) {
       let copy: i32[] = holes.slice();
       let nextPlay = update(copy, 1, i);
@@ -174,11 +177,11 @@ function maxValue(holes: i32[], step: i32, deep: i32): i32 {
         continue;
       }
       if (nextPlay == 1) {
-        let t = maxValue(copy, i, deep);
+        let t = maxValue(copy, i, deep, curMin);
         if (max < t)
           max = t;
       } else {
-        let t = minValue(copy, i, deep - 1);
+        let t = minValue(copy, i, deep - 1, max);
         if (max < t)
           max = t;
       }
@@ -188,9 +191,15 @@ function maxValue(holes: i32[], step: i32, deep: i32): i32 {
 }
 
 // 以对手的思维思考
-function minValue(holes: i32[], step: i32, deep: i32): i32 {
+function minValue(holes: i32[], step: i32, deep: i32, curMax: i32): i32 {
+  if (deep <= 0) {
+    return evaluate(holes);
+  }
   let min: i32 = 9999;
-  for (let i:i32 = 7; i < 13; i++) {
+  for (let i:i32 = 12; i >= 7; i--) {
+    if (min <= curMax) {
+      return min;
+    }
     if (holes[i] != 0) {
       let copy: i32[] = holes.slice();
       let nextPlay = update(copy, 2, i - 7);
@@ -204,11 +213,11 @@ function minValue(holes: i32[], step: i32, deep: i32): i32 {
         continue;
       }
       if (nextPlay == 2) {
-        let t = minValue(copy, i, deep);
+        let t = minValue(copy, i, deep, curMax);
         if (min > t) 
           min = t;
       } else {
-        let t = maxValue(copy, i, deep - 1);
+        let t = maxValue(copy, i, deep - 1, min);
         if (min > t)
           min = t;
       }
@@ -217,12 +226,13 @@ function minValue(holes: i32[], step: i32, deep: i32): i32 {
   return min;
 }
 
+
 export function mancalaOperator(flag: i32, status: i32[]): i32 {
   // console.log("当前场况: " + status.toString());
   if (flag == 2) {
     status = status.slice(7).concat(status.slice(0, 7));
   }
-  let deep: i32 = 5;
+  let deep: i32 = 8;
   let nextStep = miniMax(status, deep);
 
   // if (nextStep == -1) {
