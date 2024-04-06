@@ -1,9 +1,9 @@
 import assert from "assert";
 
 // Choose proper "import" depending on your PL.
-// import { mancalaOperator as op1 } from "./t3-2-as/build/release.js";
+import { mancalaOperator as op1 } from "./t3-2-as/build/release.js";
 // import { mancalaOperator as op1 } from "./wsj/t3_2_cpp.js"
-import { mancalaOperator as op1 } from "./dzx/bridge.js"
+// import { mancalaOperator as op1 } from "./dzx/bridge.js"
 // import { mancalaOperator as op1 } from "./srz_2/bridge.js"
 // import { mancalaOperator as op1 } from "./hhl/t3-2-c-pre-glue.js" 
 // import { mancalaOperator as op1 } from "./gqm/release.js"
@@ -11,10 +11,10 @@ import { mancalaOperator as op1 } from "./dzx/bridge.js"
 
 // Choose proper "import" depending on your PL.
 // import { mancalaOperator as op2 } from "./t3-2-as/build/release.js";
-// import { mancalaOperator as op2 } from "./wsj/t3_2_cpp.js"
+import { mancalaOperator as op2 } from "./wsj/t3_2_cpp.js"
 // import { mancalaOperator as op2 } from "./dzx/bridge.js"
 // import { mancalaOperator as op2 } from "./srz_2/bridge.js"
-import { mancalaOperator as op2 } from "./hhl/t3-2-c-pre-glue.js" 
+// import { mancalaOperator as op2 } from "./hhl/t3-2-c-pre-glue.js" 
 // import { mancalaOperator as op2 } from "./gqm/release.js"
 // import { mancala_operator as op2 } from "./gyy/build.js"
 
@@ -22,8 +22,8 @@ import { mancalaOperator as op2 } from "./hhl/t3-2-c-pre-glue.js"
 // [Write your own "import" for other PLs.]
 
 // Choose proper "import" depending on your PL.
-// import { mancalaBoard as board } from "./t3-1-as/build/release.js";
-import { mancala_board as board } from "./srz/kalah.js"
+import { mancalaBoard as board } from "./t3-1-as/build/release.js";
+// import { mancala_board as board } from "./srz/kalah.js"
 // [Write your own "import" for other PLs.]
 
 let operator, status, operation, operationSequence, boardReturn, isEnded;
@@ -41,6 +41,9 @@ do {
     if (operator == 1) {
         timeStamp = performance.now() * 1000;
         operation = op1(1, status);
+        if (performance.now() * 1000 - timeStamp > 2000000) {
+            console.log("超时了！");
+        }
         op1Time += performance.now() * 1000 - timeStamp;
         operationSequence.push(operation);
         boardReturn = board(1, operationSequence, operationSequence.length);

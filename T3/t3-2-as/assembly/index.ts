@@ -245,7 +245,7 @@ export function mancalaOperator(flag: i32, status: i32[]): i32 {
   if (flag == 2) {
     status = status.slice(7).concat(status.slice(0, 7));
   }
-  let deep: i32 = 10;
+  let deep: i32 = 9;
   let nextStep = miniMax(status, deep);
 
   // if (nextStep == -1) {
