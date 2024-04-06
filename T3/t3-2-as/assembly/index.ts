@@ -1,7 +1,5 @@
 
 function update(holes: i32[], player: i32, index: i32): i32 {
-  // console.log("player: " + player.toString() + " index: " + index.toString());
-  // console.log("cur holes: " + holes.toString());
   if (player == 2) {
     index += 7;
   }
@@ -9,9 +7,9 @@ function update(holes: i32[], player: i32, index: i32): i32 {
   holes[index] = 0;
   while (balls > 0) {
     index++;
-    index %= 14;
-    if (index == 6 && player == 2 || index == 13 && player == 1) {
-    } else {
+    if (index == 14)
+      index %= 14;
+    if ((player != 2 || index != 6) && (player != 1 || index != 13)) {
       holes[index]++;
       balls--;
     }
@@ -19,11 +17,9 @@ function update(holes: i32[], player: i32, index: i32): i32 {
   if (index == 6 && player == 1 || index == 13 && player == 2) {
     return player;
   }
-  if (holes[index] == 1 && Math.floor(index / 7) + 1 == player && holes[12 - index] != 0) { // 得分啦
-    let scoreHole = player * 7 - 1;
-    holes[index] = 0;
-    holes[scoreHole] += 1 + holes[12 - index];
-    holes[12 - index] = 0;
+  if (holes[index] == 1 && index / 7 + 1 == player && holes[12 - index] != 0) {
+    holes[player * 7 - 1] += 1 + holes[12 - index];
+    holes[12 - index] = holes[index] = 0;
   }
   return 3 - player;
 }
@@ -32,7 +28,7 @@ function check(holes: i32[], op: i32, nextPlay: i32, i: i32): i32 {
   if (op % 10 > 6 || op % 10 < 1) {
     return 30000 + i;
   }
-  if (nextPlay != Math.floor(op / 10)) {  // 下一手不该是你！
+  if (nextPlay != op / 10) {  // 下一手不该是你！
     return 30000 + i;
   }
   let index: i32 = nextPlay == 1 ? op % 10 - 1 : op % 10 + 6;
@@ -44,17 +40,20 @@ function check(holes: i32[], op: i32, nextPlay: i32, i: i32): i32 {
 
 function checkEnd(holes: i32[]): i32 {
   let check = 0;
-  for (let i = 0; i < 6; i++) {
-    check += holes[i];
+  for (; check < 6; check++) {
+    if (holes[check] != 0) {
+      break;
+    }
   }
-  if (check == 0) {
+  if (check == 6) {
     return 1; // 1 棋洞空，结束
   }
-  check = 0;
-  for (let i = 7; i < 13; i++) {
-    check += holes[i];
+  for (check = 7; check < 13; check++) {
+    if (holes[check] != 0) {
+      break;
+    }
   }
-  if (check == 0) {
+  if (check == 13) {
     return 2; // 2 棋洞为空
   }
   return 0; // 未结束
@@ -130,19 +129,23 @@ function evaluate(holes: i32[]): i32 {
 function miniMax(holes: i32[],  deep: i32): i32 {
   let max: i32 = -9999;
   let step: i32 = -1;
+  // const startTime: i64 = Date.now();
   for (let i:i32 = 5; i >= 0; i--) {
+    // if (Date.now() - startTime > 1000) {
+    //   return step;
+    // }
     if (holes[i] != 0) {
       let copy: i32[] = holes.slice();
       let nextPlay = update(copy, 1, i);
       if (nextPlay == 1) {
-        let t = maxValue(copy, i, deep, 9999);
+        let t = maxValue(copy, deep - 1, 9999);
         if (max < t) {
           step = i;
           max = t;
         }
         // console.log("step: " + i.toString() + " t: " + t.toString());
       } else {
-        let t = minValue(copy, i, deep - 1, max);
+        let t = minValue(copy, deep - 1, max);
         if (max < t) {
           step = i;
           max = t;
@@ -155,7 +158,7 @@ function miniMax(holes: i32[],  deep: i32): i32 {
 }
 
 // 我们始终以 1 玩家思考
-function maxValue(holes: i32[], step: i32, deep: i32, curMin: i32): i32 {
+function maxValue(holes: i32[], deep: i32, curMin: i32): i32 {
   if (deep <= 0) {
     return evaluate(holes);
   }
@@ -170,18 +173,22 @@ function maxValue(holes: i32[], step: i32, deep: i32, curMin: i32): i32 {
       let checkEnd_result = checkEnd(holes);
       if (checkEnd_result != 0) {
         if (checkEnd_result == 1) {
-          max = max < 2 * holes[6] - 48 ? 2 * holes[6] - 48 : max;
+          if (max < 2 * holes[6] - 48)
+            max = 2 * holes[6] - 48;
+          // max = max < 2 * holes[6] - 48 ? 2 * holes[6] - 48 : max;
         } else {
-          max = max < 48 - 2 * holes[13] ? 48 - 2 * holes[13] : max;
+          if (max < 48 - 2 * holes[13])
+            max = 48 - 2 * holes[13];
+          // max = max < 48 - 2 * holes[13] ? 48 - 2 * holes[13] : max;
         }
         continue;
       }
       if (nextPlay == 1) {
-        let t = maxValue(copy, i, deep, curMin);
+        let t = maxValue(copy, deep, curMin);
         if (max < t)
           max = t;
       } else {
-        let t = minValue(copy, i, deep - 1, max);
+        let t = minValue(copy, deep - 1, max);
         if (max < t)
           max = t;
       }
@@ -191,7 +198,7 @@ function maxValue(holes: i32[], step: i32, deep: i32, curMin: i32): i32 {
 }
 
 // 以对手的思维思考
-function minValue(holes: i32[], step: i32, deep: i32, curMax: i32): i32 {
+function minValue(holes: i32[], deep: i32, curMax: i32): i32 {
   if (deep <= 0) {
     return evaluate(holes);
   }
@@ -206,18 +213,22 @@ function minValue(holes: i32[], step: i32, deep: i32, curMax: i32): i32 {
       let checkEnd_result = checkEnd(holes);
       if (checkEnd_result != 0) {
         if (checkEnd_result == 1) {
-          min = min > 2 * holes[6] - 48 ? 2 * holes[6] - 48 : min;
+          if (min > 2 * holes[6] - 48)
+            min = 2 * holes[6] - 48;
+          // min = min > 2 * holes[6] - 48 ? 2 * holes[6] - 48 : min;
         } else {
-          min = min > 48 - 2 * holes[13] ? 48 - 2 * holes[13] : min;
+          if (min > 48 - 2 * holes[13])
+            min = 48 - 2 * holes[13];
+          // min = min > 48 - 2 * holes[13] ? 48 - 2 * holes[13] : min;
         }
         continue;
       }
       if (nextPlay == 2) {
-        let t = minValue(copy, i, deep, curMax);
+        let t = minValue(copy, deep - 1, curMax);
         if (min > t) 
           min = t;
       } else {
-        let t = maxValue(copy, i, deep - 1, min);
+        let t = maxValue(copy, deep - 1, min);
         if (min > t)
           min = t;
       }
@@ -228,11 +239,13 @@ function minValue(holes: i32[], step: i32, deep: i32, curMax: i32): i32 {
 
 
 export function mancalaOperator(flag: i32, status: i32[]): i32 {
+  // console.log(Date.now().toString());
+
   // console.log("当前场况: " + status.toString());
   if (flag == 2) {
     status = status.slice(7).concat(status.slice(0, 7));
   }
-  let deep: i32 = 8;
+  let deep: i32 = 10;
   let nextStep = miniMax(status, deep);
 
   // if (nextStep == -1) {

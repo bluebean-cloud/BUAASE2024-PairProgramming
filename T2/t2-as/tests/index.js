@@ -14,5 +14,6 @@ import { mancalaResult } from "../build/release.js";
 
 // assert.strictEqual(mancalaResult(2, [22, 16, 21, 12, 23, 16, 22], 7), 30006);   // 应该由 1 继续走
 // assert.strictEqual(mancalaResult(2, [12, 16, 21, 12], 4), 30000);
+// assert.strictEqual(mancalaResult(1, [11, 26], 2), 20000);
 
 console.log("ok");
